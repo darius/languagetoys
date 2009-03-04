@@ -1,0 +1,10 @@
+Currently here: a Markov random sonnet generator.
+
+Currently missing: the data it works from. You need three files:
+
+* vocab_canon_cs_3: lines like "word\tcount" for all words in your vocabulary
+* 2gm-common6: lines like "word1 word2\tcount" for common bigrams
+  (word1 can be "<S>" for start of sentence)
+* cmudict.0.7a: from http://www.speech.cs.cmu.edu/cgi-bin/cmudict
+
+I'd like to add I don't normally publish code in such a crap state.
