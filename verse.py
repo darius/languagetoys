@@ -63,6 +63,7 @@ def rhyme_phones(line):
 def pronounce_line(line):
     return reduce(operator.add, map(pronounce.pronounce, line), ())
 
+# TODO: allow extra unstressed syllables at end, for 'feminine' rhymes
 iamb = (0, 2)
 iambic_pentameter = iamb * 5
 
@@ -87,8 +88,8 @@ def gen_sonnet():
     return lines[1:]
 
 def gen_line(meter=iambic_pentameter, state='<S>', rhyme=None):
-    print 'state', state
-    for i in range(10000):
+    print >>sys.stderr, '. . .', state
+    for i in range(30000):
         line = gen(meter, state)
         if line is not None:
             if not rhyme or rhymes(line, rhyme):

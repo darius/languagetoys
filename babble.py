@@ -37,11 +37,12 @@ def pick_word(d, total):
             return word
     raise Exception("Can't happen")
 
-vocab = {}
-for line in open('vocab_canon_cs_3'):
-    word, countstr = line.split('\t')
-    vocab[word] = int(countstr)
-vocab_total = sum(vocab.itervalues())
+if False:
+    vocab = {}
+    for line in open('vocab_canon_cs_3'):
+        word, countstr = line.split('\t')
+        vocab[word] = int(countstr)
+    vocab_total = sum(vocab.itervalues())
 
 bigrams = {}
 for line in open('2gm-common6'):

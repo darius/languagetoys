@@ -3,9 +3,8 @@ output at http://darius.livejournal.com/47444.html
 To generate it:
 $ python verse.py
 
-Currently missing: the data it works from. You need three files:
+Currently missing: the data it works from. You need two files:
 
-* vocab_canon_cs_3: lines like "word\tcount" for all words in your vocabulary
 * 2gm-common6: lines like "word1 word2\tcount" for common bigrams
   (word1 can be "<S>" for start of sentence)
 * cmudict.0.7a: from http://www.speech.cs.cmu.edu/cgi-bin/cmudict
