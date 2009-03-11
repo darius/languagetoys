@@ -20,6 +20,9 @@ def pronounce(word):
 def phonetic(word):
     return ' '.join(pronounce(word))
 
+def known_words():
+    return phone_dict.iterkeys()
+
 def main():
     import sys
     for line in sys.stdin:

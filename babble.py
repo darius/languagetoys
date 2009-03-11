@@ -1,33 +1,45 @@
 import itertools
 import random
 
-#import pdist
-
-## babble(10)
-#. 'india next pics level at the and directly on the'
-
-## babble2(10)
-#. 'watching the trap of the site to go to eat'
-
 def main():
-    # print babble(100)
-    print babble2(100)
+    #load(open('2gm-common6'))
+    #load(open('3gm-bible'))
+    load(open('4gm-bible'))
+    print babble(100)
 
-def babble2(n):
-    return ' '.join(itertools.islice(babbling(), n))
+def start(tokens=('<S>',)):
+    n = the_order()
+    tokens = tokens[-n:]
+    lt = len(tokens)
+    if lt == n:
+        return tokens
+    candidates = [state
+                  for state in ngrams.iterkeys()
+                  if state[:lt] == tokens]
+    assert candidates
+    return random.choice(candidates)
+    
+def the_order():
+    for state in ngrams.iterkeys():
+        return len(state)
+    assert False
 
-def babbling(state='<S>'):
+def babble(nwords, state=None):
+    if not state: state = start()
+    return ' '.join(state + tuple(itertools.islice(babbling(state), nwords)))
+
+def babbling(state):
     while True:
         word = pick_word2(state)
         yield word
-        state = word
+        state = update(state, word)
 
-def pick_word2(prev):
-    total, d = bigrams[prev]
+def update(state, word):
+    return state[1:] + (word,)
+
+def pick_word2(state):
+    total, d = ngrams[state]
     return pick_word(d, total)
-
-def babble(n):
-    return ' '.join(pick_word(vocab, vocab_total) for i in range(n))
 
 def pick_word(d, total):
     k = random.randint(0, total-1)
@@ -37,20 +49,19 @@ def pick_word(d, total):
             return word
     raise Exception("Can't happen")
 
-if False:
-    vocab = {}
-    for line in open('vocab_canon_cs_3'):
-        word, countstr = line.split('\t')
-        vocab[word] = int(countstr)
-    vocab_total = sum(vocab.itervalues())
-
-bigrams = {}
-for line in open('2gm-common6'):
-    words, countstr = line.split('\t')
-    word1, word2 = words.split()
-    bigrams.setdefault(word1, {})[word2] = int(countstr)
-bigrams = dict((word1, (sum(d.itervalues()), d))
-               for word1, d in bigrams.iteritems())
+ngrams = {}
+                        
+def load(file, good_words=None):
+    ng = {}
+    for line in file:
+        wordstr, countstr = line.split('\t')
+        words = tuple(wordstr.split())
+        if good_words and not all(word in good_words for word in words):
+            continue
+        ng.setdefault(words[:-1], {})[words[-1]] = int(countstr)
+    global ngrams
+    ngrams = dict((state, (sum(d.itervalues()), d))
+                  for state, d in ng.iteritems())
 
 if __name__ == '__main__':
     main()
