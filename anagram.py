@@ -1,0 +1,116 @@
+"""
+Generate multi-word anagrams.
+
+$ python anagram.py a dam
+dam/mad a
+Adam
+am ad
+"""
+
+import string
+
+dict_filename = 'wordlist.txt'
+
+def main(argv):
+    write_anagrams(' '.join(argv[1:]))
+
+# We check fewer possibilities overall if we consider the most-
+# constraining letters first: the letters that appear in the
+# fewest words. These transcribe strings to and from an alphabet
+# sorted most-constraining first:
+transcribed   = 'qjxzwkvfybhmpgudclotnrsaie'
+untranscriber = string.maketrans(string.ascii_lowercase, transcribed)
+transcriber   = string.maketrans(transcribed, string.ascii_lowercase)
+def transcribe(s):   return s.translate(transcriber)
+def untranscribe(s): return s.translate(untranscriber)
+
+## transcribe('etaonrish')
+#. 'ztxsuvywk'
+## transcribe('quux a xanthic jove')
+#. 'aooc x cxutkyq bsgz'
+
+def pigeonhole(word):
+    "Two words have the same pigeonhole iff they're anagrams of each other."
+    return ''.join(sorted(word))
+
+def load(filename):
+    "Read in a word-list, one word per line."
+    pigeonholes = {}
+    prefixes = set()
+    identity = ''.join(map(chr, range(256)))
+    nonalpha = ''.join(set(identity) - set(string.ascii_lowercase))
+    def add(word):
+        canon = word.lower().translate(identity, nonalpha)
+        hole = pigeonhole(transcribe(canon))
+        pigeonholes.setdefault(hole, []).append(word)
+        for i in range(1, len(hole)+1):
+            prefixes.add(hole[:i])
+    for line in open(filename):
+        add(line.rstrip('\n'))
+    # 'a' and 'I' happen not to be in my wordlist file:
+    if transcribe('a') not in pigeonholes: add('a')
+    if transcribe('i') not in pigeonholes: add('I')
+    return pigeonholes, prefixes
+
+dictionary, dictionary_prefixes = load(dict_filename)
+
+## pt = lambda word: pigeonhole(transcribe(word))
+## pt('hel') in dictionary_prefixes, pt('hel') in dictionary
+#. (True, False)
+## pt('hello') in dictionary_prefixes, pt('hello') in dictionary
+#. (True, True)
+
+### write_anagrams('aworld')
+
+def write_anagrams(s):
+    for pigeonholes in gen_anagrams(s):
+        print ' '.join('/'.join(dictionary[p]) for p in pigeonholes)
+
+def gen_anagrams(s):
+    """Generate the anagrams of s in sorted order, each anagram itself
+    sorted, and each such anagram appearing exactly once. An anagram
+    is represented as a tuple of pigeonhole names."""
+    bag = extract_letters(transcribe(s))
+    return extend((), '', bag, '') if bag else ()
+
+def extend(acc, wp, rest, bound):
+    """Generate all the anagrams of the nonempty bag 'rest' that
+    extend 'acc' with a word starting with wp, the remainder of wp
+    being lexicographically >= 'bound'. As with gen_anagrams(), each
+    anagram is sorted and they appear in sorted order."""
+    for letter, others in each_distinct_letter(rest):
+        if not bound or bound[0] <= letter:
+            wp1 = wp + letter
+            if wp1 in dictionary_prefixes:
+                bound1 = bound[1:] if bound and bound[0] == letter else ''
+                if not bound1 and wp1 in dictionary:
+                    acc1 = acc + (wp1,)
+                    if others:
+                        for result in extend(acc1, '', others, wp1):
+                            yield result
+                    else:
+                        yield acc1
+                if others:
+                    for result in extend(acc, wp1, others, bound1):
+                        yield result
+
+def extract_letters(s):
+    return make_bag(c for c in s.lower() if c.isalpha())
+
+def make_bag(letters):
+    return ''.join(sorted(letters))
+
+def each_distinct_letter(bag):
+    """Generate (letter, bag-minus-one-of-that-letter) for each
+    different letter in the bag."""
+    prefix = ''
+    for i, letter in enumerate(bag):
+        if 0 == i or letter != bag[i-1]:
+            yield letter, bag[:i] + bag[i+1:]
+
+## list(each_distinct_letter('eehlloo'))
+#. [('e', 'ehlloo'), ('h', 'eelloo'), ('l', 'eehloo'), ('o', 'eehllo')]
+
+if __name__ == '__main__':
+    import sys
+    main(sys.argv)
