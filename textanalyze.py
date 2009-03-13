@@ -35,6 +35,8 @@ def count_ngrams(n):
 def squeeze(tokens):
     prev = None
     for t in tokens:
+        if not t:
+            continue
         if t == '<S>' and prev == '<S>':
             continue
         yield t
@@ -46,7 +48,7 @@ def enum_tokens(lines):
         if not line.strip('\n'):
             yield '<S>'
         else:
-            for t in re.findall(r"Mrs?[.]|Dr[.]|[.?!]|['\w]+", line):
+            for t in re.findall(r"Mrs?[.]|Dr[.]|[.?!]|['a-zA-Z0-9]+", line):
                 if t in '.?!':
                     # XXX inaccurate
                     yield '<S>'
