@@ -8,10 +8,7 @@ import sys
 import babble
 import pronounce
 
-#ngram_filename = '2gm-common6'
-#ngram_filename = '3gm-bible'
-#ngram_filename = '2gm-austen'
-ngram_filename = '3gm-austen'
+default_ngram_filename = '2gm-common6'
 
 start_state = ('<S>',)
 
@@ -36,17 +33,40 @@ if True:
     unstressables += 'ah en et la may non off per re than un'.split()
 unstressables = frozenset(unstressables)
 
-def main():
+bad_words = frozenset(string.ascii_lowercase) - frozenset('ai') #-'o'
+bad_words |= frozenset('co il th'.split())
+
+def main(argv):
     pronounceables = set(word.lower() for word in pronounce.known_words())
-    babble.load(open(ngram_filename), pronounceables | set(['<S>']))
-    print_verse(gen_blank_verse())
-    print_verse(gen_incantation())
-    print_verse(gen_couplet())
-    print_verse(gen_quatrain())
-    print_verse(gen_limerick())
-    print_verse(gen_neolithic())
-    print_verse(gen_double_dactyl())
-    print_verse(gen_sonnet())
+    ngram_filename = default_ngram_filename
+    if 2 <= len(argv) and argv[0] == '-f':
+        ngram_filename = argv[1]
+        argv = argv[2:]
+    babble.load(open(ngram_filename),
+                (pronounceables - bad_words) | set(['<S>']))
+    if not argv:
+        versers = [gen_blank_verse,
+                   gen_incantation,
+                   gen_couplet,
+                   gen_quatrain,
+                   gen_limerick,
+                   gen_neolithic,
+                   gen_double_dactyl,
+                   gen_sonnet]
+    else:
+        versers = [globals()['gen_' + arg] for arg in argv]
+    for verser in versers:
+        print_verse(verser())
+
+def print_double_dactyl_words():
+    for word in words_that_match(dactyl * 2):
+        print word
+
+def words_that_match(meter):
+    for word in pronounce.known_words():
+        word = word.lower()
+        if () == match_word(word, meter):
+            yield word
 
 def start():
     return babble.start(start_state)
@@ -119,8 +139,8 @@ def pronounce_line(line):
     return reduce(operator.add, map(pronounce.pronounce, line), ())
 
 slack, stressed, rhymed = range(3)
-# TODO: allow extra unstressed syllables at end, for 'feminine' rhymes
 iamb = (slack, stressed)
+dactyl = (stressed, slack, slack)
 anapest = (slack, stressed, slack) # XXX wrong
 iambic_tetrameter = iamb * 4
 iambic_pentameter = iamb * 5
@@ -140,8 +160,6 @@ def format_line(line):
             if t == 'i': t = 'I'
             out = out + ' ' + t
     return out
-    #return ' '.join('.' if t == '<S>' else t for t in line).capitalize()
-    #return ' '.join(t for t in line if t != '<S>').capitalize()
 
 def gen_blank_verse(n_lines=6, state=None):
     meters = [iambic_pentameter] * n_lines
@@ -195,7 +213,8 @@ def gen_neolithic(state=None):
     return gen_verse(rhymes, antis, meters, state)
 
 def gen_double_dactyl(state=None):
-    dactyl = (2,0,0)
+    # TODO: make the first line a name
+    # TODO: fit in a whole-line double-dactyl word in the 2nd verse
     meters = [dactyl * 2,
               dactyl * 2,
               (2,0,0,2),
@@ -289,11 +308,9 @@ def gen(meter, rhymes, antirhymes, state, counter):
     for i in range(10):
         try:
             word = babble.pick_word2(state)
-            if word in bad_words:
-                continue
-            after = match_word(word, meter)
         except KeyError:
             continue
+        after = match_word(word, meter)
         if () == after:
             rhyme = rhyme_phones([word])
             if (all(rhyme_matches(rhyme, r) for r in rhymes)
@@ -312,9 +329,6 @@ def tick(counter):
     counter[0] -= 1
     if counter[0] < 0:
         raise Exhausted()
-
-bad_words = frozenset(string.ascii_lowercase) - frozenset('ai') #-'o'
-bad_words |= frozenset('co il th'.split())
 
 def match_words(words, meter):
     for word in words:
@@ -351,4 +365,5 @@ def match_beat(beat, meter_beat):
     return beat != 0
 
 if __name__ == '__main__':
-    main()
+    import sys
+    main(sys.argv[1:])
