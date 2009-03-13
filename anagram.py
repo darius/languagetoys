@@ -18,9 +18,9 @@ def main(argv):
 # constraining letters first: the letters that appear in the
 # fewest words. These transcribe strings to and from an alphabet
 # sorted most-constraining first:
-transcribed   = 'qjxzwkvfybhmpgudclotnrsaie'
-untranscriber = string.maketrans(string.ascii_lowercase, transcribed)
-transcriber   = string.maketrans(transcribed, string.ascii_lowercase)
+alphabet      = 'qjxzwkvfybhmpgudclotnrsaie'
+untranscriber = string.maketrans(string.ascii_lowercase, alphabet)
+transcriber   = string.maketrans(alphabet, string.ascii_lowercase)
 def transcribe(s):   return s.translate(transcriber)
 def untranscribe(s): return s.translate(untranscriber)
 
@@ -75,8 +75,8 @@ def gen_anagrams(s):
 
 def extend(acc, wp, rest, bound):
     """Generate all the anagrams of the nonempty bag 'rest' that
-    extend 'acc' with a word starting with wp, the remainder of wp
-    being lexicographically >= 'bound'. As with gen_anagrams(), each
+    extend acc with a word starting with wp, the remainder of wp
+    being lexicographically >= bound. As with gen_anagrams(), each
     anagram is sorted and they appear in sorted order."""
     for letter, others in each_distinct_letter(rest):
         if not bound or bound[0] <= letter:
