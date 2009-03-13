@@ -1,7 +1,8 @@
 """
-Given a disemvoweled text, try to guess the original text. Here are
-three corpus-based strategies: use a unigram model, or a bigram model
-greedily, or a bigram model with the Viterbi algorithm.
+Given a disemvoweled text, try to guess the original text (i.e.,
+"re-emvowel" it). Here are three corpus-based strategies: use a
+unigram model, or a bigram model greedily, or a bigram model with the
+Viterbi algorithm.
 """
 
 import math
