@@ -9,10 +9,10 @@ import itertools
 import re
 import sys
 
-def main():
+def main(argv):
     #print_tokens()
     # count_bigrams()
-    count_ngrams(3)
+    count_ngrams(int(argv[0]))
 
 def print_tokens():
     for token in squeeze(enum_tokens(sys.stdin)):
@@ -56,4 +56,4 @@ def enum_tokens(lines):
                     yield t.rstrip('.').strip("'")
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
