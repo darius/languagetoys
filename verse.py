@@ -111,6 +111,9 @@ def rime(phones):
 
 def rhyme_phones(line):
     line = [t for t in line if t != '<S>']
+    # XXX using only the last word gives better results for now,
+    #  but will have to be revisited:
+    if line: line = [line[-1]]
     before = []
     vowels = []
     after  = []
@@ -230,19 +233,21 @@ def gen_double_dactyl(state=None):
 
 def gen_limerick(state=None):
     #end1 = anapest if random.randint(0, 1) else iamb
-    end1 = anapest if False else iamb
-    end2 = anapest if False else iamb
-    meters = [anapest * 2 + end1,
-              anapest * 2 + end1,
-              anapest + end2,
-              anapest + end2,
-              anapest * 2 + end1]
-    anapest1 = (slack, slack, stressed)
-    meters = [anapest1 * 3,
-              anapest1 * 3,
-              anapest1 * 2,
-              anapest1 * 2,
-              anapest1 * 3]
+    if random.randint(0, 1):
+        end1 = anapest if False else iamb
+        end2 = anapest if False else iamb
+        meters = [anapest * 2 + end1,
+                  anapest * 2 + end1,
+                  anapest + end2,
+                  anapest + end2,
+                  anapest * 2 + end1]
+    else:
+        anapest1 = (slack, slack, stressed)
+        meters = [anapest1 * 3,
+                  anapest1 * 3,
+                  anapest1 * 2,
+                  anapest1 * 2,
+                  anapest1 * 3]
     # rhyme_scheme = 'aabba'
     rhymes = [[],[1],[],[3],[2,1]]
     antis  = [[],[],[1],[],[]]
