@@ -23,12 +23,10 @@ def count_ngrams(n):
     state = ()
     for token in squeeze(enum_tokens(sys.stdin)):
         word = token if token == '<S>' else token.lower()
-        if n-1 == len(state):
-            key = state + (word,)
-            d[key] = d.get(key, 0) + 1
-            state = state[1:] + (word,)
-        else:
-            state = state + (word,)
+        state += (word,)
+        if n == len(state):
+            d[state] = d.get(state, 0) + 1
+            state = state[1:]
     for words, count in d.iteritems():
         sys.stdout.write('%s\t%d\n' % (' '.join(words), count))
 
