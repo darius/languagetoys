@@ -33,7 +33,7 @@ if True:
     unstressables += 'ah en et la may non off per re than un'.split()
 unstressables = frozenset(unstressables)
 
-bad_words = frozenset(string.ascii_lowercase) - frozenset('ai') #-'o'
+bad_words = frozenset(string.ascii_lowercase) - frozenset('aio')
 bad_words |= frozenset('co il th'.split())
 
 def main(argv):
