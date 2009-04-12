@@ -10,16 +10,16 @@ import operator
 import random
 import re
 
-N = 3                           # Markov model order
-nwords = 1000                   # How many names to generate
-min_length = 5                  # Print only names at least this long
-max_length = 10                 # and no longer than this
-penalize_length = False         # If true, longer names get worse ratings
+N = 3                        # Markov model order
+nwords = 10000               # How many names to generate
+min_length = 5               # Print only names at least this long
+max_length = 10              # and no longer than this
+penalize_length = True       # If true, longer names get worse ratings
 
 def main():
     for i in range(nwords):
         name = gen_name()
-        print '%4.2f %s' % (cross_entropy(name), name.encode('utf8'))
+        print '%5.2f %s' % (cross_entropy(name), name.encode('utf8'))
 
 def cross_entropy(name):
     p = model_probability(name)
