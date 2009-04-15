@@ -7,12 +7,16 @@ Adam
 am ad
 """
 
+import re
 import string
 
 dict_filename = 'wordlist.txt'
 
 def main(argv):
-    write_anagrams(' '.join(argv[1:]))
+    input = ' '.join(argv[1:])
+    global dictionary, dictionary_prefixes
+    dictionary, dictionary_prefixes = load(dict_filename, input)
+    write_anagrams(input)
 
 # We check fewer possibilities overall if we consider the most-
 # constraining letters first: the letters that appear in the
@@ -33,13 +37,15 @@ def pigeonhole(word):
     "Two words have the same pigeonhole iff they're anagrams of each other."
     return ''.join(sorted(word))
 
-def load(filename):
+def load(filename, subject=None):
     "Read in a word-list, one word per line."
     pigeonholes = {}
     prefixes = set()
     identity = ''.join(map(chr, range(256)))
     nonalpha = ''.join(set(identity) - set(string.ascii_lowercase))
+    usable = usable_pattern(subject)
     def add(word):
+        if not usable(word): return
         canon = word.lower().translate(identity, nonalpha)
         hole = pigeonhole(transcribe(canon))
         pigeonholes.setdefault(hole, []).append(word)
@@ -52,7 +58,18 @@ def load(filename):
     if transcribe('i') not in pigeonholes: add('I')
     return pigeonholes, prefixes
 
-dictionary, dictionary_prefixes = load(dict_filename)
+def usable_pattern(subject):
+    """Return a predicate that accepts words that could be part of an
+    anagram of subject. (But a None subject could be anything.) Pruning
+    the dictionary speeds things up a bit."""
+    if subject is None:
+        return lambda word: True
+    alphabet = set(extract_letters(subject))
+    pattern = re.compile('([%s]|\W)+$' % ''.join(alphabet), re.I)
+    return pattern.match
+
+#dictionary, dictionary_prefixes = load(dict_filename)
+dictionary, dictionary_prefixes = None, None
 
 ## pt = lambda word: pigeonhole(transcribe(word))
 ## pt('hel') in dictionary_prefixes, pt('hel') in dictionary
