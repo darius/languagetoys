@@ -11,6 +11,13 @@ TODO: get better at stripping affixes
   (though that's not always a win: e.g.:
   contendresse                   contendress + tendresse)
   (also: bunchawed from bunch and unchawed)
+Solution: don't strip affixes from the dictionary. Instead,
+filter out portmanteaus with unshared parts that are merely
+sequences of affixes. (This ought to help us to be more relaxed
+in our affix-matching, too -- not as big a deal when we're 
+too aggressive?)
+Note however that this would produce multiple affix-variants of a
+portmanteau, that need to be cut down for presentation.
 
 TODO: currently we're matching suffixes against prefixes instead
 of midparts, so the motivating example above doesn't even appear...
@@ -33,7 +40,7 @@ right_noise = """
   ogy proof r ress ry s ship tion y
 """.split()
 
-def noisy(w):
+def is_noisy(w):
     for ln in left_noise:
         if w.startswith(ln) and w[len(ln):] in raw_words:
             return True
@@ -46,7 +53,7 @@ def noisy(w):
             return True
     return False
 
-words = set(w for w in raw_words if not noisy(w))
+words = set(w for w in raw_words if not is_noisy(w))
 
 if False:
     for word in sorted(words):
@@ -73,8 +80,7 @@ for prefix, prefix_words in prefixes.iteritems():
     if prefix in suffixes:
         suffix_words = suffixes[prefix]
         if suffix_words != prefix_words:
-            if any(not p.startswith(s)
-                   and not s.endswith(p)
+            if any(not p.startswith(s) and not s.endswith(p)
                    and (s + p[len(prefix):]) not in raw_words
                    for p in prefix_words
                    for s in suffix_words):
@@ -94,9 +100,9 @@ import math
 import pdist
 
 def score((s, p, affix)):
-    return -math.log10(pdist.Pw(s) * pdist.Pw(p) * 1.1**len(affix))
+    #return -math.log10(pdist.Pw(s) * pdist.Pw(p) * 1.1**len(affix))
     L = len(s) + len(p) - len(affix)
-    return -math.log10(pdist.Pw(s) * pdist.Pw(p) * 2**(-float(L)/len(affix)))
+    return -math.log10(pdist.Pw(s) * pdist.Pw(p) * 16**(-float(L)/len(affix)))
 
 results = [(score(triple), triple)
            for affix in common
