@@ -25,10 +25,47 @@ of midparts, so the motivating example above doesn't even appear...
 TODO: the pronunciations should blend, not just the spelling.
 """
 
+import math
 import re
 
-raw_words = set(unicode(line.rstrip('\n'), 'utf8').lower()
-                for line in open('words')) #open('/usr/share/dict/words'))
+import pdist
+
+dictionary_filename = 'words'  #'/usr/share/dict/words'
+
+def print_all_portmanteaus():
+    for score, (s, p, affix) in sorted(all_portmanteaus()):
+        combo = s + p[len(affix):]
+        print '  %6.2f %-30s %s + %s' % (score, combo, s, p)
+
+def all_portmanteaus():
+    words = [w for w in raw_words if is_root_word(w) and 3 < len(w)]
+    suffixes = group(all_suffixes(words))
+    for affix, p in all_prefixes(words):
+        if affix in suffixes:
+            suffix_words = suffixes[affix]
+            for s in suffix_words:
+                if is_portmanteau(s, p, affix):
+                    yield score(s, p, affix), (s, p, affix)
+
+def group(pairs):
+    table = {}
+    for k, v in pairs:
+        table.setdefault(k, []).append(v)
+    return table
+
+def is_portmanteau(s, p, affix):
+    return (not p.startswith(s) and not s.endswith(p)
+            and (s + p[len(affix):]) not in raw_words)
+
+def score(s, p, affix):
+    L = len(s) + len(p) - len(affix)
+    return -math.log10(pdist.Pw(s) * pdist.Pw(p) * 16**(-float(L)/len(affix)))
+
+def all_prefixes(words):
+    return ((w[:i], w) for w in words for i in range(3, len(w)+1))
+
+def all_suffixes(words):
+    return ((w[i:], w) for w in words for i in range(len(w)-3))
 
 left_noise = """
   be bi em en di duo im iso non oct octo out pre quad quadra quadri re
@@ -40,74 +77,22 @@ right_noise = """
   ogy proof r ress ry s ship tion y
 """.split()
 
-def is_noisy(w):
+def is_root_word(w):
+    "Return true iff w has no affixes."
     for ln in left_noise:
         if w.startswith(ln) and w[len(ln):] in raw_words:
-            return True
+            return False
     for rn in right_noise:
         if w.endswith(rn) and w[:-len(rn)] in raw_words:
-            return True
+            return False
     for i in range(1, len(w)):
         p, s = w[:i], w[i:]
         if p in raw_words and s in raw_words:
-            return True
-    return False
+            return False
+    return True
 
-words = set(w for w in raw_words if not is_noisy(w))
+raw_words = set(unicode(line.rstrip('\n'), 'utf8').lower()
+                for line in open(dictionary_filename))
 
-if False:
-    for word in sorted(words):
-        print word
-    import sys
-    sys.exit(0)
 
-prefixes = {}
-for w in words:
-    if 3 < len(w):
-        for i in range(3, len(w)+1):
-            p = w[:i]
-            prefixes.setdefault(p, []).append(w)
-               
-suffixes = {}
-for w in words:
-    if 3 < len(w):
-        for i in range(len(w)-3):
-            p = w[i:]
-            suffixes.setdefault(p, []).append(w)
-
-common = set()
-for prefix, prefix_words in prefixes.iteritems():
-    if prefix in suffixes:
-        suffix_words = suffixes[prefix]
-        if suffix_words != prefix_words:
-            if any(not p.startswith(s) and not s.endswith(p)
-                   and (s + p[len(prefix):]) not in raw_words
-                   for p in prefix_words
-                   for s in suffix_words):
-                common.add(prefix)
-
-print len(common)
-print max(common, key=len)
-
-def portmanteaus(affix):
-    for p in prefixes[affix]:
-        for s in suffixes[affix]:
-            if (not p.startswith(s) and not s.endswith(p)
-                and (s + p[len(affix):]) not in raw_words):
-                yield s, p, affix
-
-import math
-import pdist
-
-def score((s, p, affix)):
-    #return -math.log10(pdist.Pw(s) * pdist.Pw(p) * 1.1**len(affix))
-    L = len(s) + len(p) - len(affix)
-    return -math.log10(pdist.Pw(s) * pdist.Pw(p) * 16**(-float(L)/len(affix)))
-
-results = [(score(triple), triple)
-           for affix in common
-           for triple in portmanteaus(affix)]
-
-for score, (s, p, affix) in sorted(results):
-    combo = s + p[len(affix):]
-    print '  %6.2f %-30s %s + %s' % (score, combo, s, p)
+print_all_portmanteaus()
