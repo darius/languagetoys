@@ -46,9 +46,8 @@ else:
     dictionary_filename = '/usr/share/dict/words'
 
 def print_all_portmanteaus():
-    for score, (s, p, affix) in sorted(all_portmanteaus()):
-        combo = s + p[len(affix):]
-        print '  %6.2f %-30s %s + %s' % (score, combo, s, p)
+    for score, (s, p, blend) in sorted(all_portmanteaus()):
+        print '  %6.2f %-30s %s + %s' % (score, blend, s, p)
 
 def all_portmanteaus():
     words = [w for w in raw_words if is_root_word(w) and 3 < len(w)]
@@ -57,28 +56,33 @@ def all_portmanteaus():
         if affix in suffixes:
             suffix_words = suffixes[affix]
             for s in suffix_words:
-                if is_portmanteau(s, p, affix):
-                    yield score(s, p, affix), (s, p, affix)
+                blend = s + p[len(affix):]
+                if not is_degenerate_portmanteau(s, p, blend):
+                    yield score(s, p, affix), (s, p, blend)
+
+def all_prefixes(words):
+    return ((w[:i], w) for w in words for i in range(3, len(w)))
+
+def all_suffixes(words):
+    return ((w[i:], w) for w in words for i in range(1, len(w)-3))
+
+def is_degenerate_portmanteau(s, p, blend):
+    return p.startswith(s) or s.endswith(p) or blend in raw_words
 
 def group(pairs):
+    """Given (key,value) pairs, return a table mapping each key to a
+    list of all its values."""
     table = {}
     for k, v in pairs:
         table.setdefault(k, []).append(v)
     return table
 
-def is_portmanteau(s, p, affix):
-    return (not p.startswith(s) and not s.endswith(p)
-            and (s + p[len(affix):]) not in raw_words)
-
 def score(s, p, affix):
+    """Return a measure of the quality or interestingness of a
+    portmanteau. Lower scores are better. A 'good' portmanteau is made
+    out of common words with a lot of overlap between them."""
     L = len(s) + len(p) - len(affix)
     return -math.log10(pdist.Pw(s) * pdist.Pw(p) * 16**(-float(L)/len(affix)))
-
-def all_prefixes(words):
-    return ((w[:i], w) for w in words for i in range(3, len(w)+1))
-
-def all_suffixes(words):
-    return ((w[i:], w) for w in words for i in range(len(w)-3))
 
 left_noise = """
   be bi em en di duo im iso non oct octo out pre quad quadra quadri re
@@ -91,7 +95,7 @@ right_noise = """
 """.split()
 
 def is_root_word(w):
-    "Return true iff w has no affixes."
+    "Return true unless w is an affixed or compound word."
     for ln in left_noise:
         if w.startswith(ln) and w[len(ln):] in raw_words:
             return False
