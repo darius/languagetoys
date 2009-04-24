@@ -2,6 +2,12 @@
 Let's find pairs of words that blend nicely, like
 book + hookup --> bookup
 
+Usage:
+$ python portmanteau.py >output
+Takes around 40 seconds on a 2008-vintage laptop.
+Alternatively:
+$ python portmanteau.py my-dictionary-filename >output
+
 Strategy: given a wordlist, first remove generative affixes like un-
 and -ly. Find all reasonably-long substrings of every word. Match
 suffixes of candidate first words with midparts of candidate second
@@ -18,6 +24,9 @@ in our affix-matching, too -- not as big a deal when we're
 too aggressive?)
 Note however that this would produce multiple affix-variants of a
 portmanteau, that need to be cut down for presentation.
+Also: the last check in is_root_word,
+    if p in raw_words and s in raw_words:
+is overeager.
 
 TODO: currently we're matching suffixes against prefixes instead
 of midparts, so the motivating example above doesn't even appear...
@@ -27,10 +36,14 @@ TODO: the pronunciations should blend, not just the spelling.
 
 import math
 import re
+import sys
 
 import pdist
 
-dictionary_filename = 'words'  #'/usr/share/dict/words'
+if len(sys.argv) == 2:
+    dictionary_filename = sys.argv[1]
+else:
+    dictionary_filename = '/usr/share/dict/words'
 
 def print_all_portmanteaus():
     for score, (s, p, affix) in sorted(all_portmanteaus()):
@@ -85,7 +98,7 @@ def is_root_word(w):
     for rn in right_noise:
         if w.endswith(rn) and w[:-len(rn)] in raw_words:
             return False
-    for i in range(1, len(w)):
+    for i in range(2, len(w)-1):
         p, s = w[:i], w[i:]
         if p in raw_words and s in raw_words:
             return False
