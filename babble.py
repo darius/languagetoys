@@ -37,6 +37,10 @@ def babbling(state):
 def update(state, word):
     return state[1:] + (word,)
 
+def all_successors(state):
+    total, d = ngrams[state]
+    return d.iterkeys()
+
 def pick_word2(state):
     total, d = ngrams[state]
     return pick_word(d, total)
