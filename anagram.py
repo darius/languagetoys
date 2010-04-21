@@ -10,7 +10,9 @@ am ad
 import re
 import string
 
+# Configure me by editing these constants:
 dict_filename = 'wordlist.txt'
+write_in_expanded_form = True
 
 def main(argv):
     input = ' '.join(argv[1:])
@@ -38,7 +40,7 @@ def pigeonhole(word):
     return ''.join(sorted(word))
 
 def load(filename, subject=None):
-    "Read in a word-list, one word per line."
+    "Read in a word-list, one word per line. Prune it wrt subject."
     pigeonholes = {}
     prefixes = set()
     identity = ''.join(map(chr, range(256)))
@@ -60,16 +62,15 @@ def load(filename, subject=None):
 
 def usable_pattern(subject):
     """Return a predicate that accepts words that could be part of an
-    anagram of subject. (But a None subject could be anything.) Pruning
-    the dictionary speeds things up a bit."""
+    anagram of subject. (But a None subject could be anything.) This
+    is to prune the dictionary to speed things up a bit."""
     if subject is None:
         return lambda word: True
     alphabet = set(extract_letters(subject))
     pattern = re.compile('([%s]|\W)+$' % ''.join(alphabet), re.I)
     return pattern.match
 
-#dictionary, dictionary_prefixes = load(dict_filename)
-dictionary, dictionary_prefixes = None, None
+dictionary, dictionary_prefixes = None, None  # = load(dict_filename)
 
 ## pt = lambda word: pigeonhole(transcribe(word))
 ## pt('hel') in dictionary_prefixes, pt('hel') in dictionary
@@ -81,7 +82,19 @@ dictionary, dictionary_prefixes = None, None
 
 def write_anagrams(s):
     for pigeonholes in gen_anagrams(s):
-        print ' '.join('/'.join(dictionary[p]) for p in pigeonholes)
+        if write_in_expanded_form:
+            for words in cross_product(map(dictionary.get, pigeonholes)):
+                print ' '.join(words)
+        else:
+            print ' '.join('/'.join(dictionary[p]) for p in pigeonholes)
+
+def cross_product(lists):
+    if not lists:
+        yield []
+    else:
+        for xs in cross_product(lists[1:]):
+            for x in lists[0]:
+                yield [x] + xs
 
 def gen_anagrams(s):
     """Generate the anagrams of s in sorted order, each anagram itself
