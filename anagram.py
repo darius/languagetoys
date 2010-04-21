@@ -15,7 +15,7 @@ dict_filename = 'wordlist.txt'
 write_in_expanded_form = True
 
 def main(argv):
-    input = ' '.join(argv[1:])
+    input = ' '.join(argv[1:]).lower()
     global dictionary, dictionary_prefixes
     dictionary, dictionary_prefixes = load(dict_filename, input)
     write_anagrams(input)
