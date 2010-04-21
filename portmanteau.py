@@ -32,6 +32,8 @@ TODO: currently we're matching suffixes against prefixes instead
 of midparts, so the motivating example above doesn't even appear...
 
 TODO: the pronunciations should blend, not just the spelling.
+
+TODO: produce chained multi-word portmanteaus
 """
 
 import math
