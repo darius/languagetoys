@@ -112,7 +112,7 @@ def extend(acc, wp, rest, bound):
         if not bound or bound[0] <= letter:
             wp1 = wp + letter
             if wp1 in dictionary_prefixes:
-                bound1 = bound[1:] if bound and bound[0] == letter else ''
+                bound1 = bound[1:] if bound[0:1] == letter else ''
                 if not bound1 and wp1 in dictionary:
                     acc1 = acc + (wp1,)
                     if others:
