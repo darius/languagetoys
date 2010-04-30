@@ -12,7 +12,7 @@ import string
 
 # Configure me by editing these constants:
 dict_filename = 'wordlist.txt'
-write_in_expanded_form = True
+write_in_expanded_form = False
 
 def main(argv):
     input = ' '.join(argv[1:]).lower()
@@ -70,7 +70,8 @@ def usable_pattern(subject):
     pattern = re.compile('([%s]|\W)+$' % ''.join(alphabet), re.I)
     return pattern.match
 
-dictionary, dictionary_prefixes = None, None  # = load(dict_filename)
+dictionary, dictionary_prefixes = None, None
+#dictionary, dictionary_prefixes = load(dict_filename)
 
 ## pt = lambda word: pigeonhole(transcribe(word))
 ## pt('hel') in dictionary_prefixes, pt('hel') in dictionary
@@ -109,7 +110,7 @@ def extend(acc, wp, rest, bound):
     being lexicographically >= bound. As with gen_anagrams(), each
     anagram is sorted and they appear in sorted order."""
     for letter, others in each_distinct_letter(rest):
-        if not bound or bound[0] <= letter:
+        if bound[0:1] <= letter:
             wp1 = wp + letter
             if wp1 in dictionary_prefixes:
                 bound1 = bound[1:] if bound[0:1] == letter else ''
