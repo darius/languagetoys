@@ -1,7 +1,6 @@
 import itertools
 import operator
 import random
-import re
 import string
 import sys
 
@@ -66,6 +65,7 @@ def print_verse(verse):
     for line in verse:
         print format_line(line)
     print
+    print 'Unknown:', ' '.join(set(word for line in verse for word in line if word in guesses))
 
 def format_line(line):
     out = ''
@@ -288,7 +288,36 @@ def match_word(word, meter):
     if True:
         if word == '<S>':
             return meter, None
-    return match_phones(pronounce.pronounce(word), meter)
+    try:
+        phones = pronounce.pronounce(word)
+    except KeyError:
+        return try_guess(word, meter)
+    else:
+        return match_phones(phones, meter)
+
+import guessbeats
+guesses = guessbeats.load()
+
+def try_guess(word, meter):
+    print 'YO! TRYING', word
+    try:
+        beats = guesses[word]
+    except KeyError:
+        return None, None
+    lobeat, hibeat = argh(beats)
+    nvowels = len(beats)
+    for j, m in enumerate(meter):
+        if nvowels <= j:
+            return meter[j:], None
+        if m == rhymed:
+            return None, None
+        if not match_beat(beats[j], m, lobeat, hibeat):
+            # XXX let's try a special case improvement until we can
+            #   better it:
+            if beats == (1, 0, 0,) and meter[:3] == (1, 0, 1):
+                return meter[3:], None
+            return None, None
+    return None, None
 
 def match_phones(phones, meter):
     beats = segment_beats(phones)
@@ -309,12 +338,16 @@ def match_phones(phones, meter):
             if nphones <= p:
                 return None, None
         if not match_beat(int(phones[p][-1]), m, lobeat, hibeat):
+            # XXX let's try a special case improvement until we can
+            #   better it:
+            if beats == [1, 0, 0] and meter[:3] == (1, 0, 1):
+                return meter[3:], None
             return None, None
         p += 1
         v += 1
         if v == nvowels:
             return meter[j+1:], None
-    return (), None
+    return (), None             # XXX shouldn't this be None, None?
 
 sheeshtable = [0, 2, 1]
 def argh(beats):

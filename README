@@ -1,7 +1,8 @@
 Currently here: a Markov random sonnet generator. There's sample
 output at http://darius.livejournal.com/47444.html
+(The program does somewhat better now than what's shown off there.)
 To generate it:
-$ python verse.py
+$ python verse.py sonnet  # or other verse form it knows about
 
 Currently missing: the data it works from. You need two files:
 

@@ -55,9 +55,12 @@ def avoid_long_words(key, N):
 ################ Loading Data
 
 # About 7% of 5gram counts missing
-NT = 1024908267229 ## Number of tokens
-Pw  = Pdist(datafile('vocab_canon_cs_3'), NT, avoid_long_words)
-Pw2 = Pdist(datafile('2gm-common6'), NT)
+#NT = 1024908267229 ## Number of tokens
+#Pw  = Pdist(datafile('vocab_canon_cs_3'), NT, avoid_long_words)
+#Pw2 = Pdist(datafile('2gm-common6'), NT)
+NT = 1024908267229 + 1e10 ## Number of tokens -- contractions added
+Pw  = Pdist(datafile('contractionmodel.unigram'), NT, avoid_long_words)
+Pw2 = Pdist(datafile('contractionmodel.bigram'), NT)
 
 #NT = 641241
 #Pw  = Pdist(datafile('vocab_austen'), NT, avoid_long_words)

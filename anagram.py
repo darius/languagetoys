@@ -12,7 +12,7 @@ import string
 
 # Configure me by editing these constants:
 dict_filename = 'wordlist.txt'
-write_in_expanded_form = False
+write_in_expanded_form = True
 
 def main(argv):
     input = ' '.join(argv[1:]).lower()
