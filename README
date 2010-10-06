@@ -2,7 +2,7 @@ Currently here: a Markov random sonnet generator. There's sample
 output at http://darius.livejournal.com/47444.html
 (The program does somewhat better now than what's shown off there.)
 To generate it:
-$ python verse.py sonnet  # or other verse form it knows about
+$ python verse.py sonnet  # or limerick or other verse form it knows about
 
 Currently missing: the data it works from. You need two files:
 
@@ -11,3 +11,29 @@ Currently missing: the data it works from. You need two files:
 * cmudict.0.7a: from http://www.speech.cs.cmu.edu/cgi-bin/cmudict
 
 I'd like to add I don't normally publish code in such a crap state.
+
+
+Some other hacks thrown in here:
+
+* anagram.py generates multiword anagrams
+
+* bestpermutation.py helps to sort anagrams by quality (using n-gram
+statistics and brute force)
+
+* bibleanalyze.py breaks down the Gutenberg Project's KJ Bible into raw material for other hacks here
+
+* companynames.py generate random Web2.0 company names, along with a plausibility rating for each.
+
+* emvowel.py reverses disemvoweling
+
+* mnemonify.py tries to invent mnemonics like pi's "How I wish I could enumerate pi easily..."
+
+* portmanteau.py finds pairs of words that blend nicely, like book + hookup --> bookup
+
+* summarize.py generates chapter 'summaries' for a book, like http://wry.me/blog/2010/04/08/quantitative-tolkien-studies.html
+
+* textanalyze.py is a super-crude sentence segmenter
+
+* tohtml.py writes HTML that highlights words with increasing intensity the more unlikely they are according to a language model
+
+* verse.py described above
