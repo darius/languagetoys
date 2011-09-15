@@ -6,7 +6,8 @@ $ python verse.py sonnet  # or limerick or other verse form it knows about
 
 Currently missing: the data it works from. You need two files:
 
-* 2gm-common6: lines like "word1 word2\tcount" for common bigrams
+* 2gm-common6: from http://norvig.com/ngrams/
+  (lines like "word1 word2\tcount" for common bigrams)
   (word1 can be "<S>" for start of sentence)
 * cmudict.0.7a: from http://www.speech.cs.cmu.edu/cgi-bin/cmudict
 
