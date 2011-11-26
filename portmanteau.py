@@ -34,6 +34,8 @@ of midparts, so the motivating example above doesn't even appear...
 TODO: the pronunciations should blend, not just the spelling.
 
 TODO: produce chained multi-word portmanteaus
+
+TODO: compare http://stackoverflow.com/questions/4697508/python-combining-strings-into-the-shortest-possible-string
 """
 
 import math
