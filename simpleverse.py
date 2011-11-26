@@ -11,17 +11,11 @@ import itertools
 import random
 import sys
 
-if __name__ == '__main__':
-    import ansi
-else:
-    class ansi:
-        home = ''
-        clear_to_eol = ''
-        clear_to_bottom = ''
+import ansi
+
 
 def main(argv):
     show(versify(int(argv[1])))
-    print redisplay_count()
     return 0
 
 def show(lines, out=sys.stdout):
@@ -29,15 +23,14 @@ def show(lines, out=sys.stdout):
     out.write(ansi.home)
     for line in lines:
         out.write(' '.join(line) + ansi.clear_to_eol + '\n')
-        if False: print '  ', ' '.join('-'.join(pronunciations[word])
-                                       for word in line)
     out.write(ansi.clear_to_bottom)
 
 def redisplay(lines):
-    if redisplay_count() % 1000 == 0:
+    if redisplay_count() % 5000 == 0:
         show(lines)
 
 redisplay_count = itertools.count().next
+
 
 def versify(nlines):
     "Compose nlines lines of verse."
