@@ -38,7 +38,7 @@ def versify(nlines):
     while True:
         redisplay(lines)
         append_word(lines)
-        value = evaluate(lines[-1], lines)
+        value = evaluate(lines)
         if value == 'good':
             if len(lines) == nlines:
                 break
@@ -58,14 +58,14 @@ def backtrack(lines):
             lines.pop()
         lines[-1].pop()
 
-def evaluate(line, lines):
+def evaluate(lines):
     "Return an evaluation of the last line: bad, incomplete, or good."
-    phones = pronounce(line)
+    phones = pronounce(lines[-1])
     if not is_iambic(phones):
         return 'bad'
     nsyllables = sum(map(is_vowel, phones))
     if 10 < nsyllables:
-        return 'bad'            # TODO: allow 'feminine' endings
+        return 'bad'            # TODO: allow non-'masculine' endings
     elif nsyllables < 10:
         return 'incomplete'
     else:
@@ -89,14 +89,18 @@ def rhymes_ok(phones, lines):
     n = len(lines) - 1
     return (all(rhymes(phones, pronounce(lines[j]))
                 for j in rhyme_lines[n])
-            and not any(rhymes(phones, pronounce(lines[j]))
+            and not any(rime(phones) == rime(pronounce(lines[j]))
                         for j in anti_lines[n]))
 
 def rhymes(phones1, phones2):
     "Does phones1 rhyme with phones2?"
     i1, i2 = find_rime(phones1), find_rime(phones2)
-    return (phones1[i1:] == phones2[i2:]
-            and phones1[i1-1:i1] != phones2[i2-1:i2])
+    return (phones1[i1-1:i1] != phones2[i2-1:i2]
+            and phones1[i1:] == phones2[i2:])
+
+def rime(phones):
+    "Return the suffix that must sound the same in a rhyme."
+    return phones[find_rime(phones):]
 
 def find_rime(phones):
     "Return the position of the stressed vowel starting phones's rime."
