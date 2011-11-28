@@ -32,26 +32,35 @@ def redisplay(lines):
 redisplay_count = itertools.count().next
 
 
-def versify(nlines):
-    "Compose nlines lines of verse."
+def versify(nlines, cutoff=200000, kappa=2.5):
+    "Compose a verse of nlines lines."
+    while True:
+        lines = restart(nlines, cutoff, kappa)
+        if lines is not None:
+            return lines
+
+def restart(nlines, cutoff, kappa):
+    "Compose a verse of nlines lines. Give up after cutoff backtracks."
     lines = [[]]
+    count = itertools.count().next
     while True:
         redisplay(lines)
         append_word(lines)
         value = evaluate(lines)
         if value == 'good':
             if len(lines) == nlines:
-                break
+                return lines
             lines.append([])
         elif value == 'bad':
-            backtrack(lines)
-    return lines
+            if cutoff <= count():
+                return None
+            backtrack(lines, kappa)
 
 def append_word(lines):
     lines[-1].append(random.choice(vocabulary))
 
-def backtrack(lines):
-    distance = int(1 + random.expovariate(2.5))
+def backtrack(lines, kappa):
+    distance = int(1 + random.expovariate(kappa))
     for i in range(distance):
         while not lines[-1]:
             if len(lines) == 1: return
@@ -94,6 +103,9 @@ def rhymes_ok(phones, lines):
 
 def rhymes(phones1, phones2):
     "Does phones1 rhyme with phones2?"
+    # TODO: allow rhymes like 'nibble/intelligible'
+    # where the meter stresses 'gible' when the word
+    # itself doesn't.
     i1, i2 = find_rime(phones1), find_rime(phones2)
     return (phones1[i1-1:i1] != phones2[i2-1:i2]
             and phones1[i1:] == phones2[i2:])
