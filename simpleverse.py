@@ -81,9 +81,9 @@ def evaluate(lines):
         return 'good' if rhymes_ok(phones, lines) else 'bad'
 
 def is_iambic(phones):
-    "We deem phones iambic if the odd-numbered syllables are unstressed."
+    "We deem phones iambic if the even-numbered syllables are unstressed."
     rhythm = [phone[-1] for phone in phones if phone[-1] in '012']
-    return all(i % 2 == 1 or stress == '0' for i, stress in enumerate(rhythm))
+    return all(rhythm[i] == '0' for i in range(0, len(rhythm), 2))
 
 def is_vowel(phone):
     return phone[-1] in '012'
