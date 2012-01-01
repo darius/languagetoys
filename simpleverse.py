@@ -42,7 +42,7 @@ def versify(nlines, cutoff=200000, kappa=2.5):
 def restart(nlines, cutoff, kappa):
     "Compose a verse of nlines lines. Give up after cutoff backtracks."
     lines = [[]]
-    count = itertools.count().next
+    bad_count = itertools.count().next
     while True:
         redisplay(lines)
         append_word(lines)
@@ -52,7 +52,7 @@ def restart(nlines, cutoff, kappa):
                 return lines
             lines.append([])
         elif value == 'bad':
-            if cutoff <= count():
+            if cutoff <= bad_count():
                 return None
             backtrack(lines, kappa)
 
