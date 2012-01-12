@@ -38,3 +38,6 @@ statistics and brute force)
 * tohtml.py writes HTML that highlights words with increasing intensity the more unlikely they are according to a language model
 
 * verse.py described above
+
+See also https://github.com/darius/amphigory for verse-making
+rewritten in Javascript.
