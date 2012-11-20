@@ -1,92 +1,67 @@
-"""
-Given a disemvoweled text, try to guess the original text (i.e.,
-"re-emvowel" it). Here are three corpus-based strategies: use a
-unigram model, or a bigram model greedily, or a bigram model with the
-Viterbi algorithm.
-"""
-
-import math
+from math import log10
 import re
+import sys
 
 # pdist.Pw is the unigram model, and pdist.cPw the bigram.
 import pdist
+from pdist import Pw, cPw
 
 # A special token our models take to signify the start of a sentence.
-sentence_token = '<' + 'S' + '>'
+sentence_token = '<s>'
 
 y_is_a_vowel = False
+vowels = r'[aeiouyAEIOUY]' if y_is_a_vowel else r'[aeiouAEIOU]'
 
 def disemvowel(t):
-    if y_is_a_vowel:
-        return re.sub(r'[aeiouyAEIOUY]', '', t)
-    return re.sub(r'[aeiouAEIOU]', '', t)
+    return re.sub(vowels, '', t)
 
 emvowel_dict = {}
-for token in pdist.Pw.iterkeys():
+for token in Pw.iterkeys():
     emvowel_dict.setdefault(disemvowel(token), []).append(token)
 
 def all_emvowelings(token):
-    if token == sentence_token: return [sentence_token]
     # XXX case actually matters. E.g. Russia vs. RSS.
     t = token.lower()
     return emvowel_dict.get(t) or [t]
 
-def emvowel_one_token(token):
-    return max(all_emvowelings(token), key=pdist.Pw.get)
-
-def emvowel1(tokens):
-    return map(emvowel_one_token, tokens)
-
-def greedy_emvowel2(tokens):
-    rv = []
-    prev = sentence_token
-    for t in tokens:
-        prev = max(all_emvowelings(t),
-                   key=lambda candidate: pdist.cPw(candidate, prev))
-        rv.append(prev)
-    return rv
-
-def viterbi_emvowel2(tokens):
-    logprob, words = max(emvoweling(tuple(tokens)))
-    return words[1:]
+def emvowel_unigram(tokens):
+    return tuple(max(all_emvowelings(token), key=Pw)
+                 for token in tokens)
 
 @pdist.memo
-def emvoweling(tokens):
-    if not tokens:
-        return [(0.0, [sentence_token])]
-    def extend((logprob, words), word):
-        return (logprob + math.log10(pdist.cPw(word, words[-1])),
-                words + [word])
-    def extend2(prevresult, tween, word):
-        return extend(extend(prevresult, tween) if tween else prevresult,
-                      word)
-    prevresults = emvoweling(tokens[:-1])
-    return [max(extend(prevresult, candidate) for prevresult in prevresults)
-# This is to try inserting missing 'a' and 'I' words; but it never 
-# seems to judge them worth inserting, in practice:
-#                for tween in ['a', 'i', None])
-            for candidate in all_emvowelings(tokens[-1])]
+def emvowel1(tokens, prev=sentence_token):
+    if not tokens: return ()
+    first, rest = tokens[0], tokens[1:]
+    return max(((word,) + emvowel1(rest, word)
+                for word in all_emvowelings(first)),
+               key=lambda words: pdist.product(cPw(v, u)
+                                               for u, v in bigrams((prev,) + words)))
+
+def bigrams(words):
+    for i in range(len(words)-1):
+        yield words[i:i+2]
+
+def emvowel(tokens, prev=sentence_token):
+    @pdist.memo
+    def ev(tokens, prev):
+        if not tokens: return 0, ()
+        first_token, rest_tokens = tokens[0], tokens[1:]
+        return max((log10(cPw(word, prev)) + logp_rest,
+                    (word,) + rest)
+                   for word in all_emvowelings(first_token)
+                   for logp_rest, rest in [ev(rest_tokens, word)])
+    logp, words = ev(tokens, prev)
+    return words
 
 def try_on(sample):
-    print sample
-    tokens = re.findall(r"['\w]+", sample)
-    print 
-    print ' '.join(emvowel1(tokens))
-    print 
-    print ' '.join(greedy_emvowel2(tokens))
-    print 
-    print ' '.join(viterbi_emvowel2(tokens))
-    # Let's look into why Viterbi over bigrams is so slow here:
-    options = [len(all_emvowelings(t)) for t in tokens]
-    print options
-    print sum(options), 'steps for greedy_emvowel2'
-    print sum(prev * next for prev, next in zip([1] + options, options)), \
-        'steps for viterbi_emvowel2'
-    # So it turns out to be common in our corpus for very short words
-    # to have 100-200 emvowelings. This is expensive since we're
-    # quadratic in that number (while of course linear in the length
-    # of the input). This suggests trimming very-uncommon words from
-    # emvowel_dict.
+    tokens = tuple(re.findall(r"['\w]+", sample))
+    print 'unigram:'
+    print indent(' '.join(emvowel_unigram(tokens)))
+    print 'emvowel:'
+    print indent(' '.join(emvowel(tokens)))
+
+def indent(s):
+    return '    ' + s.replace('\n', '\n    ')
 
 samples = \
 ["""f t's tr tht r spcs s ln n th nvrs, thn 'd hv t sy tht th nvrs md rthr lw nd sttld fr vry lttl.
@@ -126,9 +101,16 @@ Frn Lbwtz""",
  """Sbd yr pptts, my drs, nd y'v cnqrd hmn ntr.
 
 Chrls Dckns""",
+"""My father's family name being Pirrip, and my Christian name Philip, my
+infant tongue could make of both names nothing longer or more explicit
+than Pip. So, I called myself Pip, and came to be called Pip.""",
  """A simple project for an NLP class would be to make a decent corpus-based re-emvoweler. This one really isn't very good, and could easily be improved by considering bigram frequencies."""]
 
-for sample in samples:
-    print '---------------------------------------------'
-    try_on(disemvowel(sample))
-    print
+def main():
+    for sample in samples:
+        print '---------------------------------------------'
+        print sample
+        try_on(disemvowel(sample))
+        print
+
+main()
