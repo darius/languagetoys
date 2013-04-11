@@ -112,7 +112,7 @@ def is_root_word(w):
             return False
     return True
 
-raw_words = set(unicode(line.rstrip('\n'), 'utf8').lower()
+raw_words = set(unicode(line.strip(), 'utf8').lower()
                 for line in open(dictionary_filename))
 
 
