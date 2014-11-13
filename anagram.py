@@ -66,12 +66,12 @@ def usable_pattern(subject):
     is to prune the dictionary to speed things up a bit."""
     if subject is None:
         return lambda word: True
-    alphabet = set(extract_letters(subject))
+    alphabet = set(bag_letters(subject))
     pattern = re.compile('([%s]|\W)+$' % ''.join(alphabet), re.I)
     return pattern.match
 
 dictionary, dictionary_prefixes = None, None
-#dictionary, dictionary_prefixes = load(dict_filename)
+## dictionary, dictionary_prefixes = load(dict_filename)
 
 ## pt = lambda word: pigeonhole(transcribe(word))
 ## pt('hel') in dictionary_prefixes, pt('hel') in dictionary
@@ -101,7 +101,7 @@ def gen_anagrams(s):
     """Generate the anagrams of s in sorted order, each anagram itself
     sorted, and each such anagram appearing exactly once. An anagram
     is represented as a tuple of pigeonhole names."""
-    bag = extract_letters(transcribe(s))
+    bag = bag_letters(transcribe(s))
     return extend((), '', bag, '') if bag else ()
 
 def extend(acc, wp, rest, bound):
@@ -109,7 +109,7 @@ def extend(acc, wp, rest, bound):
     extend acc with a word starting with wp, the remainder of wp
     being lexicographically >= bound. As with gen_anagrams(), each
     anagram is sorted and they appear in sorted order."""
-    for letter, others in each_distinct_letter(rest):
+    for letter, others in bag_extractions(rest):
         if bound[0:1] <= letter:
             wp1 = wp + letter
             if wp1 in dictionary_prefixes:
@@ -125,20 +125,20 @@ def extend(acc, wp, rest, bound):
                     for result in extend(acc, wp1, others, bound1):
                         yield result
 
-def extract_letters(s):
+def bag_letters(s):
     return make_bag(c for c in s.lower() if c.isalpha())
 
 def make_bag(letters):
     return ''.join(sorted(letters))
 
-def each_distinct_letter(bag):
+def bag_extractions(bag):
     """Generate (letter, bag-minus-one-of-that-letter) for each
     different letter in the bag."""
     for i, letter in enumerate(bag):
         if 0 == i or letter != bag[i-1]:
             yield letter, bag[:i] + bag[i+1:]
 
-## list(each_distinct_letter('eehlloo'))
+## list(bag_extractions('eehlloo'))
 #. [('e', 'ehlloo'), ('h', 'eelloo'), ('l', 'eehloo'), ('o', 'eehllo')]
 
 if __name__ == '__main__':
