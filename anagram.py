@@ -134,7 +134,6 @@ def make_bag(letters):
 def each_distinct_letter(bag):
     """Generate (letter, bag-minus-one-of-that-letter) for each
     different letter in the bag."""
-    prefix = ''
     for i, letter in enumerate(bag):
         if 0 == i or letter != bag[i-1]:
             yield letter, bag[:i] + bag[i+1:]
