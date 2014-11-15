@@ -41,3 +41,7 @@ statistics and brute force)
 
 See also https://github.com/darius/amphigory for verse-making
 rewritten in Javascript.
+
+Finally, there's https://github.com/darius/versecop -- I'm sorry I
+don't remember if it has worthwhile differences from the verse code in
+this repo.
