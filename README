@@ -14,6 +14,20 @@ Currently missing: the data it works from. You need two files:
 I'd like to add I don't normally publish code in such a crap state.
 
 
+NOTE
+
+Three files checked in to this repo (pdist.py,
+contractionmodel.bigram, and contractionmodel.unigram) are NOT
+copyright by me, Darius Bacon. They're derived from files at
+http://norvig.com/ngrams/ (but not identical to any of them).
+pdist.py by Peter Norvig is distributed under the MIT license.
+The two data files weren't originally included here, and should
+probably be removed, but I'm including them for the moment to
+make it easier to actually try out the code.
+
+The remaining files are by me, and distributed under the MIT license.
+
+
 Some other hacks thrown in here:
 
 * anagram.py generates multiword anagrams

@@ -1,5 +1,9 @@
 """
-Some code taken from Peter Norvig's forthcoming article for _Beautiful Data_.
+Some selected code from Peter Norvig, "Natural Language Corpus
+Data" in _Beautiful Data_.
+
+Copyright (c) 2008-2009 by Peter Norvig. You are free to use this code
+under the MIT license.
 """
 
 import re, string, random, glob, operator, heapq
