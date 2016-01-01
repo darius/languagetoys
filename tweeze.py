@@ -61,7 +61,10 @@ def annotated_pronounce_all(words):
 #. (56.71069362546324, ('syne',))
 
 longest = 20
-match_cost = 50
+match_cost = 25
+fit_cost = 4
+rarity_cost = 1
+roughened_cost = 1
 
 ## transcribe(*annotated_pronounce_all(tuple("the light".split())))
 #. (56.50999260901199, ('the', 'let'))
@@ -74,16 +77,16 @@ def compute_best(phones, bounds, costs, seqs, i):
     for L in range(1, min(i, longest) + 1):
         assert len(phones[:i-L]) < len(phones)
         subcost, subwords = costs[i-L], seqs[i-L]
-        cost = 4*(None is bounds[i-L])
+        subcost += fit_cost*(None is bounds[i-L])
         def add(word, common_cost):
-            attempts.append((common_cost - log10(Pw(word)) + match_cost*(word == bounds[i-L]),
+            attempts.append((common_cost - rarity_cost*log10(Pw(word)) + match_cost*(word == bounds[i-L]),
                              subwords + (word,)))
         exacts = words_of_phones.get(phones[i-L:i], ())
         for word in exacts:
-            add(word, subcost + cost)
+            add(word, subcost)
         for word in rough_words.get(roughen(phones[i-L:i]), ()):
             if word not in exacts:
-                add(word, subcost + cost + 1)
+                add(word, subcost + roughened_cost)
     return min(attempts) if attempts else (1e6, ('XXX',))
 
 def transcribe(phones, bounds):
