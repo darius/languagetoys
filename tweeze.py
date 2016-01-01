@@ -1,7 +1,7 @@
 """
 Try to produce manglings like "Tweeze denied beef worker isthmus".
 """
-import sys; sys.setrecursionlimit(10000)
+import sys; sys.setrecursionlimit(8000)
 
 from memo import memo
 from pdist import Pw
@@ -24,9 +24,14 @@ for line in open('cmudict.0.7a'):
     words_of_phones.setdefault(phones, []).append(word)
     rough_words.setdefault(roughen(phones), []).append(word)
 
-def pronounce(word): return phones_of_word[word]
+def pronounce(word):
+    if word not in phones_of_word:
+        phones_of_word[word] = (word,)
+        words_of_phones[word,] = word
+    return phones_of_word[word]
 
-def pronounce_all(words): return sum(map(pronounce, words), ())
+def pronounce_all(words):
+    return sum(map(pronounce, words), ())
 
 def annotated_pronounce_all(words):
     phones, bounds = (), ()
