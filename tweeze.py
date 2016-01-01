@@ -27,7 +27,7 @@ for line in open('cmudict.0.7a'):
 def pronounce(word):
     if word not in phones_of_word:
         phones_of_word[word] = (word,)
-        words_of_phones[word,] = word
+        words_of_phones[word,] = [word]
     return phones_of_word[word]
 
 def pronounce_all(words):
@@ -53,15 +53,18 @@ def annotated_pronounce_all(words):
 #. (('d', 'er0', 'ay1', 'ah0', 's', 'ih1', 'z', 'g', 'r', 'ey1', 't'), ('darius', None, None, None, None, 'is', None, 'great', None, None, None))
 
 ## transcribe(*annotated_pronounce_all(tuple("stirring not even a mouse".split())))
-#. (20.543223182754616, ('staying', 'not', 'ave', 'mass'))
+#. (21.741929954664087, ('staying', 'note', 'ave', 'mass'))
 ## transcribe(*annotated_pronounce_all(tuple("snug in their beds with visions".split())))
-#. (28.03218602490996, ('snug', 'in', 'there', 'bids', 'with', 'versions'))
+#. (41.43375896944574, ('snag', 'in', 'there', 'bids', 'wythe', 'versions'))
 ## transcribe(*annotated_pronounce_all(tuple("the light".split())))
-#. (7.509992609011988, ('the', 'let'))
+#. (16.509992609011988, ('the', 'let'))
+## transcribe(*annotated_pronounce_all(tuple("syne".split())))
+#. (16.710693625463243, ('syne',))
+
 
 longest = 20
 
-match_cost = 10
+match_cost = 50
 
 @memo
 def transcribe(phones, bounds):
@@ -99,12 +102,12 @@ def main():
     import re, sys, textwrap
     text = re.findall(r"['\w]+", sys.stdin.read().lower())
     phones, bounds = annotated_pronounce_all(text)
-    print text
-    print phones
-    print len(phones)
+#    print text
+#    print phones
+#    print len(phones)
     cost, words = transcribe(phones, bounds)
     print cost
-    print textwrap.fill(' '.join(words).lower())
+    print textwrap.fill(' '.join(words).lower(), 60)
 
 if __name__ == '__main__':
     main()
