@@ -1,8 +1,6 @@
 """
 Try to produce manglings like "Tweeze denied beef worker isthmus".
 """
-import sys; sys.setrecursionlimit(8000)
-
 from memo import memo
 from pdist import Pw
 from math import log10
@@ -44,9 +42,6 @@ def annotated_pronounce_all(words):
 
 ## pronounce('yay')
 #. ('y', 'ey1')
-
-## pronounce('darius')
-#. ('d', 'er0', 'ay1', 'ah0', 's')
 ## pronounce_all(('darius',))
 #. ('d', 'er0', 'ay1', 'ah0', 's')
 ## annotated_pronounce_all(('darius','is','great'))
@@ -55,41 +50,48 @@ def annotated_pronounce_all(words):
 ## transcribe(*annotated_pronounce_all(tuple("stirring not even a mouse".split())))
 #. (21.741929954664087, ('staying', 'note', 'ave', 'mass'))
 ## transcribe(*annotated_pronounce_all(tuple("snug in their beds with visions".split())))
-#. (41.43375896944574, ('snag', 'in', 'there', 'bids', 'wythe', 'versions'))
-## transcribe(*annotated_pronounce_all(tuple("the light".split())))
-#. (16.509992609011988, ('the', 'let'))
+#. (43.36161186892771, ('snag', "'n", 'there', 'bids', 'wythe', 'versions'))
 ## transcribe(*annotated_pronounce_all(tuple("syne".split())))
-#. (16.710693625463243, ('syne',))
-
+#. (56.71069362546324, ('syne',))
 
 longest = 20
-
 match_cost = 50
 
-@memo
+## transcribe(*annotated_pronounce_all(tuple("the light".split())))
+#. (56.50999260901199, ('the', 'let'))
+
+## pronounce_all(tuple("the light".split()))
+#. ('dh', 'ah0', 'l', 'ay1', 't')
+
+def compute_best(phones, bounds, costs, seqs, i):
+    attempts = []
+    for L in range(1, min(i, longest) + 1):
+        assert len(phones[:i-L]) < len(phones)
+        subcost, subwords = costs[i-L], seqs[i-L]
+        cost = 4*(None is bounds[i-L])
+        def add(word, common_cost):
+            attempts.append((common_cost - log10(Pw(word)) + match_cost*(word == bounds[i-L]),
+                             subwords + (word,)))
+        exacts = words_of_phones.get(phones[i-L:i], ())
+        for word in exacts:
+            add(word, subcost + cost)
+        for word in rough_words.get(roughen(phones[i-L:i]), ()):
+            if word not in exacts:
+                add(word, subcost + cost + 1)
+    return min(attempts) if attempts else (1e6, ('XXX',))
+
 def transcribe(phones, bounds):
     """Return (cost,words) where pronounce_all(words) matches
     `phones`. `cost` is lower the better the match. Try to find the
     lowest cost."""
-    if not phones: return 0, ()
-    attempts = []
-    for L in range(1, min(len(phones), longest) + 1):
-#        print 'phones', phones
-#        print bounds, L, bounds[-L]
-        assert len(phones[:-L]) < len(phones)
-        subcost,subwords = transcribe(phones[:-L], bounds[:-L])
-        cost = 4*(None is bounds[-L])
-        def add(word, common_cost):
-#            print 'try', word, cost, -log10(Pw(word)), match_cost*(word == bounds[-L])
-            attempts.append((common_cost - log10(Pw(word)) + match_cost*(word == bounds[-L]),
-                             subwords + (word,)))
-        exacts = words_of_phones.get(phones[-L:], ())
-        for word in exacts:
-            add(word, subcost + cost)
-        for word in rough_words.get(roughen(phones[-L:]), ()):
-            if word not in exacts:
-                add(word, subcost + cost + 1)
-    return min(attempts) if attempts else (1e6, ('XXX',))
+    assert len(phones) == len(bounds)
+    costs, seqs = [0], [()]
+    for i in range(1, len(phones) + 1):
+        cost, seq = compute_best(phones, bounds, costs, seqs, i)
+        costs.append(cost)
+        seqs.append(seq)
+    return costs[-1], seqs[-1]
+
 
 ## -log10(Pw('the'))
 #. 1.6506163745527287
