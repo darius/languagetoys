@@ -77,7 +77,7 @@ def compute_best(phones, bounds, costs, seqs, i):
     for L in range(1, min(i, longest) + 1):
         assert len(phones[:i-L]) < len(phones)
         subcost, subwords = costs[i-L], seqs[i-L]
-        subcost += fit_cost*(None is bounds[i-L])
+        subcost += fit_cost*(None is not bounds[i-L])
         def add(word, common_cost):
             attempts.append((common_cost - rarity_cost*log10(Pw(word)) + match_cost*(word == bounds[i-L]),
                              subwords + (word,)))
