@@ -5,8 +5,14 @@ from memo import memo
 from pdist import Pw
 from math import log10
 
+roughener = {
+    'd': 't', 'dh': 't', 'th': 't',
+    'l': 'r',
+    'sh': 's', 'z': 's', 'zh': 's',
+}
+
 def roughen(phones):
-    return tuple(p[-1] if p[-1].isdigit() else p
+    return tuple(p[-1] if p[-1].isdigit() else roughener.get(p, p)
                  for p in phones)
 
 phones_of_word = {}
