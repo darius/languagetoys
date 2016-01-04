@@ -62,9 +62,9 @@ def annotated_pronounce_all(words):
 
 longest = 20
 match_cost = 25
-fit_cost = 4
-rarity_cost = 1
-roughened_cost = 1
+fit_cost = 5
+rarity_cost = 5
+roughened_cost = 5
 
 ## transcribe(*annotated_pronounce_all(tuple("the light".split())))
 #. (56.50999260901199, ('the', 'let'))
