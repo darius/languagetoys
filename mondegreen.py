@@ -1,7 +1,7 @@
 """
 Try to produce manglings like "Tweeze denied beef worker isthmus".
 """
-import re
+import re, sys, textwrap
 from math import log10
 
 from memo import memo
@@ -48,9 +48,9 @@ def pronounce_line(words):
         bounds += (word,) + (None,)*(len(p)-1)
     return phones, bounds
 
-def roughen_line(phones):
-    "Roughen phones, except preserving the rime at the end."
-    i = find_rime(phones)
+def roughen_line(phones, rhyming):
+    "Roughen phones, except maybe preserving the rime at the end."
+    i = find_rime(phones) if rhyming else len(phones)
     return roughen(phones[:i]) + phones[i:]
 
 ## pronounce('yay')
@@ -104,18 +104,18 @@ def transcribe(phones, rough_phones, bounds):
 ## -log10(Pw('dar'))
 #. 5.644601987828583
 
-def pronounce_rhyming_lines(lines):
+def pronounce_lines(lines, rhyming):
     phones, rough_phones, bounds = (), (), ()
     for line in lines:
         p, b = pronounce_line(re.findall(r"['\w]+", line.lower()))
         phones += p
-        rough_phones += roughen_line(p)
+        rough_phones += roughen_line(p, rhyming)
         bounds += b
     return phones, rough_phones, bounds
 
-def main():
-    import sys, textwrap
-    phones, rough_phones, bounds = pronounce_rhyming_lines(sys.stdin)
+def main(argv):
+    rhyming = (argv[1:] == ['--rhyme'])
+    phones, rough_phones, bounds = pronounce_lines(sys.stdin, rhyming)
 #    print text
 #    print phones
 #    print rough_phones
@@ -125,4 +125,4 @@ def main():
     print textwrap.fill(' '.join(words).lower(), 60)
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
