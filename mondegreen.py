@@ -8,11 +8,31 @@ from memo import memo
 from pdist import Pw
 from simpleverse import find_rime
 
-roughener = {
-    'd': 't', 'dh': 't', 'th': 't',
-    'l': 'r',
-    'sh': 's', 'z': 's', 'zh': 's',
-}
+longest = 20
+match_cost = 25
+fit_cost = 5
+rarity_cost = 5
+roughened_cost = 15
+
+if 1:
+    roughened_cost = 5
+    roughener = {
+        'd': 't', 'dh': 't', 'th': 't',
+        'l': 'r',
+        'sh': 's', 'z': 's', 'zh': 's',
+    }
+else:
+    rough_classes = [line.split() for line in """
+b d g k p t
+ch jh
+f dh s sh th v z zh
+m n ng
+l r
+hh w y
+""".splitlines() if line]
+    roughener = {phone: rc[0]
+                 for rc in rough_classes
+                 for phone in rc}
 
 def roughen(phones):
     return tuple(p[-1] if p[-1].isdigit() else roughener.get(p, p)
@@ -22,12 +42,14 @@ phones_of_word = {}
 words_of_phones = {}
 rough_words = {}
 for line in open('cmudict.0.7a'):
-    if ';;' in line: continue
+    if line.startswith(';'): continue
     s = line.lower().split()
     if not s: continue
     word, phones = s[0], tuple(s[1:])
-    if word.endswith(')'): continue
-    phones_of_word[word] = phones
+    if word.endswith(')'):
+        word = word.rstrip('(0123456789)')
+    else:
+        phones_of_word[word] = phones
     words_of_phones.setdefault(phones, []).append(word)
     rough_words.setdefault(roughen(phones), []).append(word)
 
@@ -57,12 +79,6 @@ def roughen_line(phones, rhyming):
 #. ('y', 'ey1')
 ## pronounce_all(('darius',))
 #. ('d', 'er0', 'ay1', 'ah0', 's')
-
-longest = 20
-match_cost = 25
-fit_cost = 5
-rarity_cost = 5
-roughened_cost = 5
 
 ## pronounce_all(tuple("the light".split()))
 #. ('dh', 'ah0', 'l', 'ay1', 't')
