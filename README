@@ -1,6 +1,6 @@
-Currently here: a Markov random sonnet generator. There's sample
-output at http://darius.livejournal.com/47444.html
-(The program does somewhat better now than what's shown off there.)
+Currently here: a Markov random verse generator. There's sample
+output at https://gist.github.com/darius/2371822
+
 To generate it:
 $ python verse.py sonnet  # or limerick or other verse form it knows about
 
